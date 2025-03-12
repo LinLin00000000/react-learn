@@ -130,19 +130,22 @@ function ChartComponent() {
             position: 'top',
           },
           zoom: {
-            // 启用缩放和拖动功能
             pan: {
               enabled: true,
-              mode: 'xy',
+              mode: 'x',
+              threshold: 20,
             },
             zoom: {
               wheel: {
                 enabled: true,
+                speed: 0.05,
               },
               pinch: {
                 enabled: true,
+                mode: 'x',
+                speed: 0.05,
               },
-              mode: 'xy',
+              mode: 'x',
             },
           },
         },
