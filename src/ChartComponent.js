@@ -5,7 +5,6 @@ import './ChartComponent.css' // 假设你将样式放在单独的 CSS 文件中
 
 function ChartComponent() {
   const chartRefs = useRef({})
-  const draggables = useRef([])
 
   useEffect(() => {
     // 注册 zoom 插件
@@ -17,13 +16,24 @@ function ChartComponent() {
         .then(response => response.json())
         .then(data => {
           // 处理数据
+          // 为x轴显示日期，为tooltip显示完整信息准备两种格式的数据
           const labels = data.map(item =>
             new Date(item.created_at).toLocaleString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: false,
+              month: '2-digit',
+              day: '2-digit',
             })
+          )
+          const fullDateTimeLabels = data.map(item =>
+            new Date(item.created_at)
+              .toLocaleString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+              })
+              .replace(/(\d{2})\/(\d{2})\/\d{4},\s/, '$1/$2 ')
           )
 
           // 获取所有数据集的键，排除 created_at, id, updated_at, currentDate, huanbiDate, tongbiDate
@@ -76,7 +86,8 @@ function ChartComponent() {
               )}, ${Math.floor(Math.random() * 256)}, 0.4)`,
               `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
                 Math.random() * 256
-              )}, ${Math.floor(Math.random() * 256)}, 1)`
+              )}, ${Math.floor(Math.random() * 256)}, 1)`,
+              fullDateTimeLabels
             )
           })
         })
@@ -89,9 +100,12 @@ function ChartComponent() {
     // 设置定时器，每半小时更新一次数据
     const intervalId = setInterval(fetchData, 30 * 60 * 1000)
 
+    // 在effect内部保存当前的refs引用
+    const currentChartRefs = chartRefs.current
+
     // 清理函数，在组件卸载时销毁所有图表实例并清除定时器
     return () => {
-      Object.values(chartRefs.current).forEach(ref => {
+      Object.values(currentChartRefs).forEach(ref => {
         if (ref) {
           ref.destroy()
         }
@@ -106,7 +120,8 @@ function ChartComponent() {
     data,
     label,
     backgroundColor,
-    borderColor
+    borderColor,
+    fullDateTimeLabels
   ) => {
     const ctx = document.getElementById(`${chartId}Chart`).getContext('2d')
     chartRefs.current[chartId] = new Chart(ctx, {
@@ -128,6 +143,16 @@ function ChartComponent() {
         plugins: {
           legend: {
             position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              title: function (tooltipItems) {
+                return fullDateTimeLabels[tooltipItems[0].dataIndex]
+              },
+              label: function (context) {
+                return `${context.dataset.label}: ${context.parsed.y}`
+              },
+            },
           },
           zoom: {
             // 启用缩放和拖动功能
