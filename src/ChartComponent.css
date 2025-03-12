@@ -1,0 +1,28 @@
+.chart-container {
+    padding: 20px;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.chart-section {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-section h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.chart-section canvas {
+    width: 100%;
+    height: auto;
+}
