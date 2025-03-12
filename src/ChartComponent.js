@@ -1,79 +1,114 @@
-import React, { useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';
-import zoomPlugin from 'chartjs-plugin-zoom'; // 引入 zoom 插件
-import './ChartComponent.css'; // 假设你将样式放在单独的 CSS 文件中
+import React, { useEffect, useRef } from 'react'
+import Chart from 'chart.js/auto'
+import zoomPlugin from 'chartjs-plugin-zoom' // 引入 zoom 插件
+import './ChartComponent.css' // 假设你将样式放在单独的 CSS 文件中
 
 function ChartComponent() {
-  const chartRefs = useRef({});
-  const draggables = useRef([]);
+  const chartRefs = useRef({})
+  const draggables = useRef([])
 
   useEffect(() => {
     // 注册 zoom 插件
-    Chart.register(zoomPlugin);
+    Chart.register(zoomPlugin)
 
     const fetchData = () => {
       // 读取 market_data.json 文件
-      fetch('https://ccmgip.linlin.world/market_data')
+      fetch(`${process.env.REACT_APP_API_URL}/market_data`)
         .then(response => response.json())
         .then(data => {
           // 处理数据
-          const labels = data.map(item => new Date(item.created_at).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
+          const labels = data.map(item =>
+            new Date(item.created_at).toLocaleString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false,
+            })
+          )
 
           // 获取所有数据集的键，排除 created_at, id, updated_at, currentDate, huanbiDate, tongbiDate
-          const datasetsKeys = Object.keys(data[0]).filter(key => !['created_at', 'id', 'updated_at', 'currentDate', 'huanbiDate', 'tongbiDate'].includes(key));
+          const datasetsKeys = Object.keys(data[0]).filter(
+            key =>
+              ![
+                'created_at',
+                'id',
+                'updated_at',
+                'currentDate',
+                'huanbiDate',
+                'tongbiDate',
+              ].includes(key)
+          )
 
           // 销毁之前的图表实例（如果存在）
           Object.values(chartRefs.current).forEach(ref => {
             if (ref) {
-              ref.destroy();
+              ref.destroy()
             }
-          });
+          })
 
           // 清空现有的图表容器
-          const chartContainer = document.querySelector('.chart-grid');
-          chartContainer.innerHTML = '';
+          const chartContainer = document.querySelector('.chart-grid')
+          chartContainer.innerHTML = ''
 
           // 创建新的图表容器
           datasetsKeys.forEach((key, index) => {
-            const chartId = key;
-            const chartData = data.map(item => parseFloat(item[key]) || 0);
+            const chartId = key
+            const chartData = data.map(item => parseFloat(item[key]) || 0)
 
             // 创建一个新的图表容器
-            const chartSection = document.createElement('div');
-            chartSection.className = 'chart-section';
+            const chartSection = document.createElement('div')
+            chartSection.className = 'chart-section'
             chartSection.innerHTML = `
               <h3>${key}</h3>
               <canvas id="${chartId}Chart"></canvas>
-            `;
+            `
 
-            chartContainer.appendChild(chartSection);
+            chartContainer.appendChild(chartSection)
 
             // 创建图表实例
-            createChart(chartId, labels, chartData, key, `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.4)`, `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 1)`);
-          });
+            createChart(
+              chartId,
+              labels,
+              chartData,
+              key,
+              `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
+                Math.random() * 256
+              )}, ${Math.floor(Math.random() * 256)}, 0.4)`,
+              `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
+                Math.random() * 256
+              )}, ${Math.floor(Math.random() * 256)}, 1)`
+            )
+          })
         })
-        .catch(error => console.error('Error loading market data:', error));
-    };
+        .catch(error => console.error('Error loading market data:', error))
+    }
 
     // 初始数据获取
-    fetchData();
+    fetchData()
 
     // 设置定时器，每半小时更新一次数据
-    const intervalId = setInterval(fetchData, 30 * 60 * 1000);
+    const intervalId = setInterval(fetchData, 30 * 60 * 1000)
 
     // 清理函数，在组件卸载时销毁所有图表实例并清除定时器
     return () => {
       Object.values(chartRefs.current).forEach(ref => {
         if (ref) {
-          ref.destroy();
+          ref.destroy()
         }
-      });
-      clearInterval(intervalId);
-    };
-  }, []);
+      })
+      clearInterval(intervalId)
+    }
+  }, [])
 
-  const createChart = (chartId, labels, data, label, backgroundColor, borderColor) => {
-    const ctx = document.getElementById(`${chartId}Chart`).getContext('2d');
+  const createChart = (
+    chartId,
+    labels,
+    data,
+    label,
+    backgroundColor,
+    borderColor
+  ) => {
+    const ctx = document.getElementById(`${chartId}Chart`).getContext('2d')
     chartRefs.current[chartId] = new Chart(ctx, {
       type: 'line',
       data: {
@@ -84,9 +119,9 @@ function ChartComponent() {
             data: data,
             fill: false,
             backgroundColor: backgroundColor,
-            borderColor: borderColor
-          }
-        ]
+            borderColor: borderColor,
+          },
+        ],
       },
       options: {
         responsive: true,
@@ -94,7 +129,8 @@ function ChartComponent() {
           legend: {
             position: 'top',
           },
-          zoom: { // 启用缩放和拖动功能
+          zoom: {
+            // 启用缩放和拖动功能
             pan: {
               enabled: true,
               mode: 'xy',
@@ -107,26 +143,26 @@ function ChartComponent() {
                 enabled: true,
               },
               mode: 'xy',
-            }
-          }
+            },
+          },
         },
         scales: {
           x: {
             title: {
               display: true,
-              text: 'Date'
-            }
+              text: 'Date',
+            },
           },
           y: {
             title: {
               display: true,
-              text: label
-            }
-          }
-        }
-      }
-    });
-  };
+              text: label,
+            },
+          },
+        },
+      },
+    })
+  }
 
   return (
     <div className="chart-container">
@@ -135,7 +171,7 @@ function ChartComponent() {
         {/* 初始的 chart-section 会被动态替换 */}
       </div>
     </div>
-  );
+  )
 }
 
-export default ChartComponent;
+export default ChartComponent

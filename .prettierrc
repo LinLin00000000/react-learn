@@ -1,0 +1,8 @@
+printWidth: 80 # 指定打印宽度
+# tabWidth: 4 # 指定制表符宽度
+useTabs: false # 使用空格而不是制表符进行缩进
+semi: false # 在语句末尾不打印分号
+singleQuote: true # 使用单引号而不是双引号
+trailingComma: 'es5' # 多行时尽可能打印尾随逗号
+bracketSpacing: true # 在对象字面量之间打印空格
+arrowParens: 'avoid' # 只在必要时在箭头函数参数周围加上括号
